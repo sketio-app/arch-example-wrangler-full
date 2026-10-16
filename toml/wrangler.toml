@@ -1,0 +1,147 @@
+"$schema" = "../node_modules/wrangler/config-schema.json"
+name = "full-toml"
+main = "../src/index.ts"
+compatibility_date = "2026-09-20"
+compatibility_flags = [ "nodejs_compat" ]
+
+# All ids below are dummy values for the sample.
+[observability]
+enabled = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "full-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "full-bucket"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "00000000000000000000000000000000"
+
+# A class this Worker exports.
+[[durable_objects.bindings]]
+name = "LOCK"
+class_name = "Lock"
+
+# A class exported by another Worker.
+[[durable_objects.bindings]]
+name = "ROOM"
+class_name = "Room"
+script_name = "full-jsonc"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = [ "Lock" ]
+
+# A Service Binding to a named entrypoint of another Worker.
+[[services]]
+binding = "RPC"
+service = "full-jsonc"
+entrypoint = "Rpc"
+
+[[queues.producers]]
+binding = "JOBS"
+queue = "full-jobs"
+
+[[queues.consumers]]
+queue = "full-jobs"
+max_batch_size = 10
+max_batch_timeout = 5
+max_retries = 3
+dead_letter_queue = "full-jobs-dlq"
+
+[ai]
+binding = "AI"
+
+[[analytics_engine_datasets]]
+binding = "EVENTS"
+dataset = "full_events"
+
+[[workflows]]
+name = "full-flow-toml"
+binding = "FLOW"
+class_name = "Flow"
+
+[[vectorize]]
+binding = "INDEX"
+index_name = "full-index"
+
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "00000000000000000000000000000000"
+
+[browser]
+binding = "BROWSER"
+
+[[send_email]]
+name = "MAILER"
+allowed_destination_addresses = [ "team@example.com" ]
+
+[images]
+binding = "IMAGES"
+
+[version_metadata]
+binding = "VERSION"
+
+[[ratelimits]]
+name = "LIMITER"
+namespace_id = "1002"
+
+  [ratelimits.simple]
+  limit = 100
+  period = 60
+
+[assets]
+directory = "../public"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = [ "/api/*" ]
+
+[[routes]]
+pattern = "full-toml.example.com/*"
+zone_name = "example.com"
+
+[[routes]]
+pattern = "app-toml.example.com"
+custom_domain = true
+
+[triggers]
+crons = [ "0 3 * * *", "*/30 * * * *" ]
+
+[vars]
+ENVIRONMENT = "production"
+
+# Nothing is inherited into an environment: bindings are written out again.
+[env.staging]
+name = "full-toml-staging"
+
+  [env.staging.vars]
+  ENVIRONMENT = "staging"
+
+  [[env.staging.d1_databases]]
+  binding = "DB"
+  database_name = "full-db-staging"
+  database_id = "00000000-0000-0000-0000-000000000001"
+
+  [[env.staging.r2_buckets]]
+  binding = "BUCKET"
+  bucket_name = "full-bucket-staging"
+
+  [[env.staging.kv_namespaces]]
+  binding = "CACHE"
+  id = "00000000000000000000000000000001"
+
+  [[env.staging.queues.producers]]
+  binding = "JOBS"
+  queue = "full-jobs-staging"
+
+  [[env.staging.routes]]
+  pattern = "staging-toml.example.com"
+  custom_domain = true
+
+  [env.staging.triggers]
+  crons = [ "0 4 * * *" ]
